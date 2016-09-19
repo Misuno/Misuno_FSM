@@ -13,10 +13,10 @@ rootFSM = new FSM (gameObject, name + "_root");
 ```
 3) Create some states and add them to FSM (second parameter of AddState shows that findTarget sould be set as initial)
 ```csharp
-var findTarget = new S_FindNearestTarget (this, "find target", minSearchRadius);
+var findTarget = new S_FindNearestTarget (gameObject, "find target", minSearchRadius);
 rootFSM.AddState (findTarget, true);
 
-var moveToTarget = new S_MoveToTarget (this, "move to target", 0.01f, moveSpeed, rotationSpeed);
+var moveToTarget = new S_MoveToTarget (gameObject, "move to target", 0.01f, moveSpeed, rotationSpeed);
 rootFSM.AddState (moveToTarget);
 ```
 4) Add some transitions between states (note, than every state could have several transitions)
@@ -29,7 +29,8 @@ rootFSM.AddTransition (new ST_Timer (moveToTarget, findTarget, 15f));
 
 ## Implementing the State
 
-To create their own state one should inherit a new class from a State class. 
+To create their own state one should inherit a new class from a **State** class. 
+
 Methods to override are:
 ```csharp
 virtual public void Enter ()
@@ -83,3 +84,52 @@ namespace Misuno
     }
 }
 ```
+
+## Implementing the StateTransition
+
+To create their own state transition one should inherit a new class from a **StateTransition** class. 
+
+Method to override:
+
+```csharp
+virtual public bool Check ()
+```
+
+### Example state transition
+
+This state transaction is included into the repositiory.
+
+```csharp
+using UnityEngine;
+
+namespace Misuno
+{
+    public class ST_Timer: StateTransition
+    {
+        public readonly float Duration;
+        float timer = -1f;
+
+        public ST_Timer (State from, State to, float duration) :
+            base (from, to)
+        { 
+            Duration = duration;
+        }
+
+        override public bool Check ()
+        {
+            if (timer < 0f)
+            {
+                timer = Time.time + Duration;
+            }
+
+            if (Time.time >= timer)
+            {
+                timer = -1f;
+                return true;
+            }
+            return false;
+        }
+    }
+}
+```
+
