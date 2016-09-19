@@ -6,6 +6,11 @@ namespace Misuno
 
     public class FSM : State
     {
+        /// <summary>
+        /// Initializes a new instance of the <see cref="Misuno.FSM"/> class.
+        /// </summary>
+        /// <param name="sender">Sender.</param>
+        /// <param name="name">Name.</param>
         public FSM (GameObject sender, string name) :
             base (name)
         {
@@ -22,9 +27,9 @@ namespace Misuno
 
         State activeState;
 
-        public readonly List<State> states = new List<State> ();
+        readonly List<State> states = new List<State> ();
 
-        public readonly Dictionary<State, List<StateTransition>> transactions = new Dictionary<State, List<StateTransition>> ();
+        readonly Dictionary<State, List<StateTransition>> transactions = new Dictionary<State, List<StateTransition>> ();
 
         override public void Enter ()
         {
@@ -59,6 +64,11 @@ namespace Misuno
         {
         }
 
+        /// <summary>
+        /// Adds the state to the FSM.
+        /// </summary>
+        /// <param name="state">State to add.</param>
+        /// <param name="setInitial">If set to <c>true</c> sets the state as initial.</param>
         public void AddState (State state, bool setInitial = false)
         {
             if (!states.Contains (state))
@@ -79,11 +89,15 @@ namespace Misuno
             Enter ();
         }
 
-        public void AddTransition (StateTransition trans)
+        /// <summary>
+        /// Adds the transition to the FSM.
+        /// </summary>
+        /// <param name="transaction">Transaction to add.</param>
+        public void AddTransition (StateTransition transaction)
         {
-            if (states.Contains (trans.From) && states.Contains (trans.To))
+            if (states.Contains (transaction.From) && states.Contains (transaction.To))
             {
-                transactions [trans.From].Add (trans);
+                transactions [transaction.From].Add (transaction);
             }
         }
     }
