@@ -26,6 +26,14 @@ rootFSM.AddTransition (new ST_TargetDestroyed (moveToTarget, findTarget, this));
 rootFSM.AddTransition (new ST_Timer (moveToTarget, findTarget, 15f));
 ```
 5) You could make some complex behaviours by using FSMs as States. 
+```csharp
+var complexState = new FSM (gameObject, "complex behaviour");
+rootFSM.AddState(complexState);
+
+// Add some states and transitions to complexState.
+
+rootFSM.AddTransition( new ST_Finished (moveToTarget, complexState));
+```
 
 ## Implementing the State
 
