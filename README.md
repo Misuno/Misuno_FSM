@@ -13,17 +13,17 @@ rootFSM = new FSM (gameObject, name + "_root");
 ```
 3) Create some states and add them to FSM (second parameter of AddState shows that findTarget sould be set as initial)
 ```csharp
-var findTarget = new S_FindNearestTarget (gameObject, "find target", minSearchRadius);
-rootFSM.AddState (findTarget, true);
+var findTarget = new StateFindNearestTarget(this, "find target", minSearchRadius);
+rootFSM.AddState(findTarget, true);
 
-var moveToTarget = new S_MoveToTarget (gameObject, "move to target", 0.01f, moveSpeed, rotationSpeed);
-rootFSM.AddState (moveToTarget);
+moveToTargetState = new StateMoveToTarget(this, "move to target", 0.01f, moveSpeed, rotationSpeed, acceleration);
+rootFSM.AddState(moveToTargetState);
 ```
 4) Add some transitions between states (note, than every state could have several transitions)
 ```csharp
-rootFSM.AddTransition (new ST_Finished (findTarget, moveToTarget));
-rootFSM.AddTransition (new ST_TargetDestroyed (moveToTarget, findTarget, this));
-rootFSM.AddTransition (new ST_Timer (moveToTarget, findTarget, 15f));
+rootFSM.AddTransition(new TransitionFinished(findTarget, moveToTargetState));
+rootFSM.AddTransition(new TransitionTargetDestroyed(moveToTargetState, findTarget, this));
+rootFSM.AddTransition(new TransitionTimer(moveToTargetState, findTarget, 15f));
 ```
 5) You could make some complex behaviours by using FSMs as States. 
 ```csharp
@@ -55,14 +55,14 @@ using UnityEngine;
 
 namespace Misuno
 {
-    public class S_MoveToPosition : State
+    public class StateMoveToPosition : State
     {
         public readonly Vector3 destination;
         public float rotationSpeed = 0.1f;
         public float speed = 10f;
         public GameObject host;
 
-        public S_MoveToPosition (GameObject sender, string name, Vector3 destination, float speed = 10f, float rotationSpeed = 0.1f) :
+        public StateMoveToPosition (GameObject sender, string name, Vector3 destination, float speed = 10f, float rotationSpeed = 0.1f) :
             base (name)
         {
             host = sender;
@@ -91,6 +91,7 @@ namespace Misuno
         }
     }
 }
+
 ```
 
 ## Implementing the StateTransition
@@ -112,12 +113,12 @@ using UnityEngine;
 
 namespace Misuno
 {
-    public class ST_Timer: StateTransition
+    public class TransitionTimer: StateTransition
     {
         public readonly float Duration;
         float timer = -1f;
 
-        public ST_Timer (State from, State to, float duration) :
+        public TransitionTimer (State from, State to, float duration) :
             base (from, to)
         { 
             Duration = duration;

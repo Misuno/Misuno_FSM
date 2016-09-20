@@ -2,14 +2,14 @@
 
 namespace Misuno
 {
-    public class S_MoveToPosition : State
+    public class StateMoveToPosition : State
     {
         public readonly Vector3 destination;
         public float rotationSpeed = 0.1f;
         public float speed = 10f;
         public GameObject host;
 
-        public S_MoveToPosition (GameObject sender, string name, Vector3 destination, float speed = 10f, float rotationSpeed = 0.1f) :
+        public StateMoveToPosition (GameObject sender, string name, Vector3 destination, float speed = 10f, float rotationSpeed = 0.1f) :
             base (name)
         {
             host = sender;

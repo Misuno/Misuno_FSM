@@ -1,8 +1,8 @@
 ﻿namespace Misuno
 {
-    public class ST_Finished : StateTransition
+    public class TransitionFinished : StateTransition
     {
-        public ST_Finished (State from, State to) :
+        public TransitionFinished (State from, State to) :
             base (from, to)
         {
         }

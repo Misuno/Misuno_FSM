@@ -2,12 +2,12 @@
 
 namespace Misuno
 {
-    public class ST_Timer: StateTransition
+    public class TransitionTimer: StateTransition
     {
         public readonly float Duration;
         float timer = -1f;
 
-        public ST_Timer (State from, State to, float duration) :
+        public TransitionTimer (State from, State to, float duration) :
             base (from, to)
         { 
             Duration = duration;

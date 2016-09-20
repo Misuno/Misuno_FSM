@@ -3,11 +3,11 @@
 namespace Misuno
 {
 
-    public class ST_TargetDestroyed : StateTransition
+    public class TransitionTargetDestroyed : StateTransition
     {
         public IHasTarget host;
 
-        public ST_TargetDestroyed (State from, State to, IHasTarget target) :
+        public TransitionTargetDestroyed (State from, State to, IHasTarget target) :
             base (from, to)
         {
             host = target;
