@@ -142,3 +142,8 @@ namespace Misuno
 }
 ```
 
+## Roadmap
+[]implement visualisation for debug purposes
+[]add more general states
+[]include periodic call on the level of base classes
+
