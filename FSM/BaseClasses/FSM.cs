@@ -1,3 +1,5 @@
+using System;
+
 namespace Misuno
 {
     using UnityEngine;
@@ -6,62 +8,135 @@ namespace Misuno
 
     public class FSM : State
     {
+        private State initialState;
+
+        private Coroutine rootFSMLoopCoroutine;
+
+        private Coroutine transitionBetweenStatesCoroutine;
+        private bool isRootFSM;
+
+        public State ActiveState { get; private set; }
+
+        private readonly List<State> states = new List<State>();
+
+        private readonly Dictionary<State, List<StateTransition>> transitions = new Dictionary<State, List<StateTransition>>();
+
+        #region Constructor
+
         /// <summary>
         /// Initializes a new instance of the <see cref="Misuno.FSM"/> class.
         /// </summary>
         /// <param name="sender">Sender.</param>
         /// <param name="name">Name.</param>
-        public FSM (GameObject sender, string name) :
-            base (name)
+        public FSM(MonoBehaviour sender, string name)
+            : base(sender, name)
         {
         }
 
-        State initialState;
+        #endregion
 
-        public State ActiveState {
-            get
+        #region Enter Exit Update Check
+
+        public override void Enter()
+        {
+            base.Enter();
+            ActiveState = initialState;
+            ActiveState.Enter();
+
+            if (isRootFSM)
             {
-                return activeState;
+                rootFSMLoopCoroutine = StartCoroutine(RootFSMLoop());
             }
         }
 
-        State activeState;
-
-        readonly List<State> states = new List<State> ();
-
-        readonly Dictionary<State, List<StateTransition>> transactions = new Dictionary<State, List<StateTransition>> ();
-
-        override public void Enter ()
+        public override void Update()
         {
-            activeState = initialState;
-            activeState.Enter ();
+            if (Finished)
+                return;   
+            
+            CheckTransitions();
+
+            if (transitionBetweenStatesCoroutine != null)
+                return;
+                
+            ActiveState.Update();
         }
 
-        override public void Update ()
+        private void CheckTransitions()
         {
-            activeState.Update ();
-            var stateTransactions = transactions [activeState];
-            if (stateTransactions.Count > 0)
+            if (ActiveState != null)
             {
-                foreach (var trans in stateTransactions)
+                // Check both global transitions and current state's transitions.
+                List<StateTransition> stateTransitions = transitions[ActiveState];
+
+                if (stateTransitions.Count > 0)
                 {
-                    if (trans.Check ())
+                    foreach (StateTransition transition in stateTransitions)
                     {
-                        activeState.Exit ();
-                        activeState = trans.To;
-                        activeState.Enter ();
-                        break;
+                        if (!transition.Check())
+                            continue;
+
+                        transitionBetweenStatesCoroutine = StartCoroutine(TransitionBetweenStates(transition));
                     }
                 }
-            }
-            else
-            {
-                finished = activeState.Finished;
+                else
+                {
+                    Finished = ActiveState.Finished;
+                }
             }
         }
 
-        override public void Exit ()
+        public override IEnumerator Exit()
         {
+            if (rootFSMLoopCoroutine != null)
+            {
+                StopCoroutine(rootFSMLoopCoroutine);
+            }
+
+            if (transitionBetweenStatesCoroutine != null)
+            {
+                StopCoroutine(transitionBetweenStatesCoroutine);
+            }
+
+            yield return StartCoroutine(base.Exit());
+        }
+
+        private IEnumerator TransitionBetweenStates(StateTransition transition)
+        {
+            // Reset all current state's transtions.
+            transitions[ActiveState].ForEach(trans => trans.Reset());
+
+            yield return StartCoroutine(ActiveState.Exit());
+
+            // Switch state.
+            ActiveState = transition.toState;
+            ActiveState.Enter();
+
+            // Wait one more frame to prevent calling an Update at the same tick.
+            yield return null;
+
+            transitionBetweenStatesCoroutine = null;
+        }
+
+        private IEnumerator RootFSMLoop()
+        {
+            while (!Finished)
+            {
+                Update();
+                yield return null;
+            }
+
+            StartCoroutine(Exit());
+        }
+
+        #endregion
+
+        #region Utility methods
+
+        public void Start()
+        {
+            isRootFSM = true;
+            Enter();
         }
 
         /// <summary>
@@ -69,36 +144,43 @@ namespace Misuno
         /// </summary>
         /// <param name="state">State to add.</param>
         /// <param name="setInitial">If set to <c>true</c> sets the state as initial.</param>
-        public void AddState (State state, bool setInitial = false)
+        public void AddState(State state, bool setInitial = false)
         {
-            if (!states.Contains (state))
+            if (!states.Contains(state))
             {
-                states.Add (state);
-                transactions [state] = new List<StateTransition> ();
+                states.Add(state);
+                transitions[state] = new List<StateTransition>();
             }
 
             if (setInitial)
             {
-                SetInitialState (state);
+                SetInitialState(state);
             }
-        }
-
-        void SetInitialState (State state)
-        {
-            initialState = state;
-            Enter ();
         }
 
         /// <summary>
         /// Adds the transition to the FSM.
         /// </summary>
-        /// <param name="transaction">Transaction to add.</param>
-        public void AddTransition (StateTransition transaction)
+        /// <param name="transition">Transaction to add.</param>
+        public void AddTransition(StateTransition transition)
         {
-            if (states.Contains (transaction.From) && states.Contains (transaction.To))
+            if (states.Contains(transition.fromState) && states.Contains(transition.toState))
             {
-                transactions [transaction.From].Add (transaction);
+                transitions[transition.fromState].Add(transition);
             }
+        }
+
+        private void SetInitialState(State state)
+        {
+            initialState = state;
+        }
+
+        #endregion
+
+        public override string ToString()
+        {
+            string activeStateName = ActiveState == null ? "null" : ActiveState.ToString();
+            return string.Format("[{0}->[{1}]]", name, activeStateName);
         }
     }
 }

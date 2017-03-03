@@ -2,21 +2,32 @@ namespace Misuno
 {
     public abstract class StateTransition
     {
+        public readonly State fromState;
+        public readonly State toState;
+
         /// <summary>
         /// Initializes a new instance of the <see cref="Misuno.StateTransition"/> class.
         /// </summary>
-        /// <param name="from">State from.</param>
-        /// <param name="to">State to.</param>
-        public StateTransition (State from, State to)
+        /// <param name="fromState">State from.</param>
+        /// <param name="toState">State to.</param>
+        protected StateTransition(State fromState, State toState)
         {
-            From = from;
-            To = to;
+            this.fromState = fromState;
+            this.toState = toState;
         }
 
-        public readonly State From;
-        public readonly State To;
+        protected StateTransition()
+        {
+        }
 
+        public abstract bool Check();
 
-        abstract public bool Check ();
+        public virtual void Reset()
+        {
+        }
+
+        public virtual void Clear()
+        {
+        }
     }
 }

@@ -2,30 +2,34 @@
 
 namespace Misuno
 {
-    public class TransitionTimer: StateTransition
+    public class TransitionTimer : StateTransition
     {
         public readonly float Duration;
-        float timer = -1f;
+        private float timer = -1f;
 
-        public TransitionTimer (State from, State to, float duration) :
-            base (from, to)
-        { 
+        public TransitionTimer(State fromState, State toState, float duration) :
+            base(fromState, toState)
+        {
             Duration = duration;
         }
 
-        override public bool Check ()
+        public override bool Check()
         {
             if (timer < 0f)
             {
                 timer = Time.time + Duration;
             }
 
-            if (Time.time >= timer)
-            {
-                timer = -1f;
-                return true;
-            }
-            return false;
+            if (Time.time < timer) return false;
+
+            timer = -1f;
+            return true;
+        }
+
+        public override void Reset()
+        {
+            base.Reset();
+            timer = -1f;
         }
     }
 }

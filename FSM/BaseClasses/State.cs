@@ -1,47 +1,89 @@
-﻿using UnityEngine;
-using System.Collections;
+﻿using System.Collections;
+using UnityEngine;
 
 namespace Misuno
 {
-    public class State
+    public abstract class State
     {
-        public readonly string Name;
+        public readonly string name;
+        protected readonly MonoBehaviour host;
 
-        protected bool finished = false;
+        private MonoBehaviour worker;
 
-        public bool Finished {
-            get { return finished; }
+        protected MonoBehaviour Worker
+        {
+            get
+            {
+                if (worker == null)
+                {
+                    worker = host.GetComponent<FSMWorker>();
+                    if (worker == null)
+                    {
+                        worker = host.gameObject.AddComponent<FSMWorker>();
+                    }
+                }
+                return worker;
+            }
         }
+
+        public bool Finished { get; protected set; }
 
         /// <summary>
         /// Initializes a new instance of the <see cref="Misuno.State"/> class.
         /// </summary>
+        /// <param name = "sender"></param>
         /// <param name="name">Name.</param>
-        public State (string name = "Unnamed")
+        public State(MonoBehaviour sender, string name)
         {
-            this.Name = name;
+            this.name = name;
+            host = sender;
         }
 
         /// <summary>
         /// Method which is callen once when state is entered. 
         /// </summary>
-        virtual public void Enter ()
+        public virtual void Enter()
         {
+            Finished = false;
+//            Debug.Log(ToString() + " ENTER()");
         }
 
         /// <summary>
         /// Update method. Called every frame.
         /// </summary>
-        virtual public void Update ()
+        public virtual void Update()
         {
         }
 
         /// <summary>
         /// Method which called once when state is finished.
         /// </summary>
-        virtual public void Exit ()
+        public virtual IEnumerator Exit()
         {
-            finished = false;
+            yield break;
+        }
+
+        public void Clear()
+        {
+            if (worker != null)
+            {
+                worker.StopAllCoroutines();
+            }
+        }
+
+        protected Coroutine StartCoroutine(IEnumerator coroutine)
+        {
+            return Worker.StartCoroutine(coroutine);
+        }
+
+        protected void StopCoroutine(Coroutine coroutine)
+        {
+            Worker.StopCoroutine(coroutine);
+        }
+
+        public override string ToString()
+        {
+            return string.Format("[State: {0}]", name);
         }
     }
 }

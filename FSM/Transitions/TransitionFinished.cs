@@ -2,14 +2,14 @@
 {
     public class TransitionFinished : StateTransition
     {
-        public TransitionFinished (State from, State to) :
-            base (from, to)
+        public TransitionFinished (State fromState, State toState) :
+            base (fromState, toState)
         {
         }
 
-        override public bool Check ()
+        public override bool Check ()
         {
-            return From.Finished;
+            return fromState.Finished;
         }
     }
 }
