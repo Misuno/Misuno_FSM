@@ -85,5 +85,14 @@ namespace Misuno
         {
             return string.Format("[State: {0}]", name);
         }
+
+        #region DebugDrawing
+
+        public float NameLength()
+        {
+            return GUI.skin.label.CalcSize(new GUIContent(name)).x;
+        }
+
+        #endregion
     }
 }
