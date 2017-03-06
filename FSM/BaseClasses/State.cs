@@ -1,4 +1,5 @@
 ﻿using System.Collections;
+using System.Collections.Generic;
 using UnityEngine;
 
 namespace Misuno
@@ -88,9 +89,12 @@ namespace Misuno
 
         #region DebugDrawing
 
-        public float NameLength()
+        public virtual Vector2 Draw(Vector2 position)
         {
-            return GUI.skin.label.CalcSize(new GUIContent(name)).x;
+            Vector2 size = GUI.skin.label.CalcSize(new GUIContent(name)) + new Vector2(10f, 10f);
+            size += new Vector2(15f, 15f);
+            GUI.Box(new Rect(position, size), name);
+            return position + size;
         }
 
         #endregion

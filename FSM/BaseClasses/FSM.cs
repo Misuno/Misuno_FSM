@@ -182,5 +182,17 @@ namespace Misuno
             string activeStateName = ActiveState == null ? "null" : ActiveState.ToString();
             return string.Format("[{0}->[{1}]]", name, activeStateName);
         }
+
+        public override Vector2 Draw(Vector2 position)
+        {
+            
+            // Draw state.
+
+            // Dtaw all states, conected to initial.
+
+
+            return position;
+        }
+
     }
 }
